@@ -67,7 +67,7 @@ const CLI = parseCliArgs(process.argv.slice(2));
 // Calculated via kosher-zmanim for Pesach 5786 dates. Overridden by --city.
 let Z = {
   bedikat:    { tzait: "8:01 PM" },
-  erev:       { hanetz: "6:42 AM", sofAchila: "10:55 AM", sofBiur: "11:58 AM", plag: "6:02 PM",  shkiah: "7:21 PM", candleLighting: "7:21 PM", tzait: "8:02 PM" },
+  erev:       { hanetz: "6:42 AM", sofAchila: "10:55 AM", sofBiur: "11:58 AM", plag: "6:02 PM",  shkiah: "7:21 PM", candleLighting: "7:03 PM", tzait: "8:02 PM" },
   yomtov1:    { hanetz: "6:40 AM", chatzot: "1:01 PM",  shkiah: "7:22 PM", candleLighting: "8:03 PM", tzait: "8:03 PM" },
   yomtov2:    { hanetz: "6:39 AM", candleLighting: "7:05 PM", shkiah: "7:23 PM", tzait: "8:04 PM" },
   shabbat:    { hanetz: "6:37 AM", minchaGedola: "1:33 PM", plag: "6:04 PM", shkiah: "7:24 PM", tzait: "8:05 PM" },
@@ -163,7 +163,7 @@ function calcZmanim(lat, lon, tz) {
   return {
     bedikat:    { tzait: fmt(b.Tzais) },
     erev:       { hanetz: fmt(ev.Sunrise), sofAchila: sofAchila(ev), sofBiur: sofBiur(ev), plag: fmt(ev.PlagHamincha),
-                  shkiah: fmt(ev.Sunset), candleLighting: fmt(ev.Sunset), tzait: fmt(ev.Tzais) },
+                  shkiah: fmt(ev.Sunset), candleLighting: candleLighting(ev), tzait: fmt(ev.Tzais) },
     yomtov1:    { hanetz: fmt(y1.Sunrise), chatzot: fmt(y1.Chatzos),
                   shkiah: fmt(y1.Sunset), candleLighting: fmt(y1.Tzais), tzait: fmt(y1.Tzais) },
     yomtov2:    { hanetz: fmt(y2.Sunrise), candleLighting: candleLighting(y2),
