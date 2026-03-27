@@ -13,6 +13,8 @@
  * Default z'manim are for Margate City, NJ (39.3287°N, 74.5003°W), calculated
  * via kosher-zmanim (GRA). Use --city to override for any other location.
  *
+ * Copyright (c) 2026 Leonard Rosenthol. MIT License.
+ *
  * Prerequisites:
  *   npm install -g docx        (tested with docx 9.x)
  *
