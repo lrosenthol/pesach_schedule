@@ -67,7 +67,7 @@ const CLI = parseCliArgs(process.argv.slice(2));
 // Calculated via kosher-zmanim for Pesach 5786 dates. Overridden by --city.
 let Z = {
   bedikat:    { tzait: "8:01 PM" },
-  erev:       { hanetz: "6:42 AM", sofBiur: "11:58 AM", plag: "6:02 PM",  shkiah: "7:21 PM", candleLighting: "7:21 PM", tzait: "8:02 PM" },
+  erev:       { hanetz: "6:42 AM", sofAchila: "10:55 AM", sofBiur: "11:58 AM", plag: "6:02 PM",  shkiah: "7:21 PM", candleLighting: "7:21 PM", tzait: "8:02 PM" },
   yomtov1:    { hanetz: "6:40 AM", chatzot: "1:01 PM",  shkiah: "7:22 PM", candleLighting: "8:03 PM", tzait: "8:03 PM" },
   yomtov2:    { hanetz: "6:39 AM", candleLighting: "7:05 PM", shkiah: "7:23 PM", tzait: "8:04 PM" },
   shabbat:    { hanetz: "6:37 AM", minchaGedola: "1:33 PM", plag: "6:04 PM", shkiah: "7:24 PM", tzait: "8:05 PM" },
@@ -134,6 +134,12 @@ function calcZmanim(lat, lon, tz) {
     return (parseInt(m[1]) * 3600 + parseInt(m[2]) * 60 + parseFloat(m[3])) * 1000;
   }
 
+  function sofAchila(z) {
+    const rise  = new Date(z.Sunrise).getTime();
+    const shaah = parseDuration(z.ShaahZmanisGra);
+    return fmt(new Date(rise + 4 * shaah).toISOString());
+  }
+
   function sofBiur(z) {
     const rise  = new Date(z.Sunrise).getTime();
     const shaah = parseDuration(z.ShaahZmanisGra);
@@ -156,7 +162,7 @@ function calcZmanim(lat, lon, tz) {
 
   return {
     bedikat:    { tzait: fmt(b.Tzais) },
-    erev:       { hanetz: fmt(ev.Sunrise), sofBiur: sofBiur(ev), plag: fmt(ev.PlagHamincha),
+    erev:       { hanetz: fmt(ev.Sunrise), sofAchila: sofAchila(ev), sofBiur: sofBiur(ev), plag: fmt(ev.PlagHamincha),
                   shkiah: fmt(ev.Sunset), candleLighting: fmt(ev.Sunset), tzait: fmt(ev.Tzais) },
     yomtov1:    { hanetz: fmt(y1.Sunrise), chatzot: fmt(y1.Chatzos),
                   shkiah: fmt(y1.Sunset), candleLighting: fmt(y1.Tzais), tzait: fmt(y1.Tzais) },
@@ -372,8 +378,9 @@ function pageErevPesach() {
     spacer(120),
     sectionLabel("Z'MANIM", GRAY_LIGHT),
     spacer(60),
-    zmanRow(Z.erev.hanetz, [e("Hanetz ("), h("הַנֵּץ הַחַמָּה"), e(") — sunrise; "), h("תַּעֲנִית בְּכוֹרוֹת"), e(" begins")]),
-    zmanRow(Z.erev.sofBiur, [e("Latest "), h("בִּיעוּר חָמֵץ"), e(" — burn "), h("חָמֵץ"), e(" before this time; recite final "), h("בִּיטּוּל")]),
+    zmanRow(Z.erev.hanetz,    [e("Hanetz ("), h("הַנֵּץ הַחַמָּה"), e(") — sunrise; "), h("תַּעֲנִית בְּכוֹרוֹת"), e(" begins")]),
+    zmanRow(Z.erev.sofAchila, [e("Latest eating of "), h("חָמֵץ"), e(" ("), h("סוֹף זְמַן אֲכִילַת חָמֵץ"), e(")")]),
+    zmanRow(Z.erev.sofBiur,   [e("Latest "), h("בִּיעוּר חָמֵץ"), e(" — burn "), h("חָמֵץ"), e(" before this time; recite final "), h("בִּיטּוּל")]),
     zmanRow(Z.erev.plag,  [e("Plag "), h("הַמִּנְחָה")]),
     zmanRow(Z.erev.shkiah,         [e("Shkiah ("), h("שְׁקִיעָה"), e(") — Yom Tov begins")]),
     zmanRow(Z.erev.candleLighting, [e("Candle lighting")]),
@@ -507,6 +514,7 @@ function pageShabbat() {
     serviceRow("9:30 AM", [h("שַׁחֲרִית"), e(" — "), h("שַׁבָּת"), e(" "), h("נֻסַּח"), e("; full "), h("הַלֵּל"), e("; Torah reading; "), h("מוּסָף"), e(" ("), h("שַׁבָּת"), e(" + "), h("חוֹל הַמּוֹעֵד"), e(" combined); no "), h("יִזְכּוֹר")]),
     serviceRow("~1:00 PM", [h("סְעוּדָה שְׁלִישִׁית"), e(" — "), h("שִׁיר הַשִּׁירִים"), e(" reading customary")]),
     serviceRow("7:00 PM",  [h("מִנְחָה")]),
+    serviceRow(Z.shabbat.tzait, [h("שַׁבָּת"), e(" ends")]),
     serviceRow(Z.shabbat.tzait, [h("מַעֲרִיב"), e(" + "), h("הַבְדָּלָה"), e(" — wine only; no "), h("בְּשָׂמִים"), e(", no candle ("), h("קֹדֶשׁ לְקֹדֶשׁ"), e(")")]),
     spacer(100),
     sectionLabel("TORAH READING & PRAYER NOTES", AMBER_LIGHT),
@@ -652,9 +660,11 @@ function pageAcharon() {
     spacer(100),
     sectionLabel("DAVENING / SERVICES", BLUE_LIGHT),
     spacer(60),
-    serviceRow("9:30 AM", [h("שַׁחֲרִית"), e(" — half "), h("הַלֵּל"), e("; Torah reading; "), h("יִזְכּוֹר"), e(" after Torah")]),
-    serviceRow("11:00 AM", [h("מוּסָף"), e(" — last day Yom Tov "), h("נֻסַּח")]),
+    serviceRow("9:30 AM",  [h("שַׁחֲרִית"), e(" — half "), h("הַלֵּל"), e("; Torah reading")]),
+    serviceRow("11:00 AM", [h("יִזְכּוֹר"), e(" — after Torah reading")]),
+    serviceRow("11:30 AM", [h("מוּסָף"), e(" — last day Yom Tov "), h("נֻסַּח")]),
     serviceRow("7:00 PM",  [h("מִנְחָה")]),
+    serviceRow("Following Mincha", [h("סְעוּדַת מָשִׁיחַ"), e(" — "), h("דִּבְרֵי תּוֹרָה"), e(" and "), h("לְחַיִּים")]),
     serviceRow(Z.acharon.tzait, [h("מַעֲרִיב"), e(" + full "), h("הַבְדָּלָה"), e(" (wine, "), h("בְּשָׂמִים"), e(", candle)")]),
     spacer(100),
     sectionLabel("TORAH READING & PRAYER NOTES", BLUE_LIGHT),
