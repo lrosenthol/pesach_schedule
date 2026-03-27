@@ -10,7 +10,8 @@
  *   maftir + haftarah), tefila notes, and halachic guidance boxes.
  * Hebrew terms (with nikudot) are embedded inline in English prose.
  *
- * Z'manim are approximated for Pleasantville / Atlantic County, NJ (~39.4°N).
+ * Default z'manim are for Margate City, NJ (39.3287°N, 74.5003°W), calculated
+ * via kosher-zmanim (GRA). Use --city to override for any other location.
  *
  * Prerequisites:
  *   npm install -g docx        (tested with docx 9.x)
@@ -60,18 +61,18 @@ function parseCliArgs(argv) {
 }
 const CLI = parseCliArgs(process.argv.slice(2));
 
-// ── Default z'manim (hardcoded for Pleasantville / Atlantic County, NJ) ──────
-// Overridden at runtime when --city is supplied.
+// ── Default z'manim (Margate City, NJ — 39.3287°N, 74.5003°W, America/New_York)
+// Calculated via kosher-zmanim for Pesach 5786 dates. Overridden by --city.
 let Z = {
-  bedikat:    { tzait: "8:08 PM" },
-  erev:       { hanetz: "6:29 AM", sofBiur: "10:58 AM", plag: "7:30 PM",   shkiah: "7:48 PM", tzait: "8:11 PM" },
-  yomtov1:    { hanetz: "6:27 AM", chatzot: "12:49 PM", shkiah: "7:49 PM", tzait: "8:12 PM" },
-  yomtov2:    { hanetz: "6:26 AM", candleLighting: "7:32 PM", shkiah: "7:50 PM", tzait: "8:13 PM" },
-  shabbat:    { hanetz: "6:24 AM", minchaGedola: "1:20 PM", plag: "7:28 PM", shkiah: "7:51 PM", tzait: "8:14 PM" },
-  cholhamoed: { hanetz: "6:22 AM", shkiah: "7:52 PM", tzait: "8:15 PM" },
-  erevshevii: { hanetz: "6:18 AM", candleLighting: "7:36 PM", shkiah: "7:54 PM", tzait: "8:17 PM" },
-  shevii:     { hanetz: "6:17 AM", shkiah: "7:55 PM", tzait: "8:18 PM" },
-  acharon:    { hanetz: "6:15 AM", shkiah: "7:56 PM", tzait: "8:19 PM" },
+  bedikat:    { tzait: "8:01 PM" },
+  erev:       { hanetz: "6:42 AM", sofBiur: "11:58 AM", plag: "6:02 PM",  shkiah: "7:21 PM", candleLighting: "7:21 PM", tzait: "8:02 PM" },
+  yomtov1:    { hanetz: "6:40 AM", chatzot: "1:01 PM",  shkiah: "7:22 PM", candleLighting: "8:03 PM", tzait: "8:03 PM" },
+  yomtov2:    { hanetz: "6:39 AM", candleLighting: "7:05 PM", shkiah: "7:23 PM", tzait: "8:04 PM" },
+  shabbat:    { hanetz: "6:37 AM", minchaGedola: "1:33 PM", plag: "6:04 PM", shkiah: "7:24 PM", tzait: "8:05 PM" },
+  cholhamoed: { hanetz: "6:36 AM", shkiah: "7:25 PM", tzait: "8:06 PM" },
+  erevshevii: { hanetz: "6:31 AM", candleLighting: "7:10 PM", shkiah: "7:28 PM", tzait: "8:09 PM" },
+  shevii:     { hanetz: "6:29 AM", shkiah: "7:29 PM", candleLighting: "8:10 PM", tzait: "8:10 PM" },
+  acharon:    { hanetz: "6:28 AM", shkiah: "7:30 PM", tzait: "8:11 PM" },
 };
 
 // ── Timezone inference from longitude ─────────────────────────────────────────
@@ -154,9 +155,9 @@ function calcZmanim(lat, lon, tz) {
   return {
     bedikat:    { tzait: fmt(b.Tzais) },
     erev:       { hanetz: fmt(ev.Sunrise), sofBiur: sofBiur(ev), plag: fmt(ev.PlagHamincha),
-                  shkiah: fmt(ev.Sunset), tzait: fmt(ev.Tzais) },
+                  shkiah: fmt(ev.Sunset), candleLighting: fmt(ev.Sunset), tzait: fmt(ev.Tzais) },
     yomtov1:    { hanetz: fmt(y1.Sunrise), chatzot: fmt(y1.Chatzos),
-                  shkiah: fmt(y1.Sunset),  tzait: fmt(y1.Tzais) },
+                  shkiah: fmt(y1.Sunset), candleLighting: fmt(y1.Tzais), tzait: fmt(y1.Tzais) },
     yomtov2:    { hanetz: fmt(y2.Sunrise), candleLighting: candleLighting(y2),
                   shkiah: fmt(y2.Sunset),  tzait: fmt(y2.Tzais) },
     shabbat:    { hanetz: fmt(sh.Sunrise), minchaGedola: fmt(sh.MinchaGedola),
@@ -164,7 +165,7 @@ function calcZmanim(lat, lon, tz) {
     cholhamoed: { hanetz: fmt(ch.Sunrise), shkiah: fmt(ch.Sunset), tzait: fmt(ch.Tzais) },
     erevshevii: { hanetz: fmt(es.Sunrise), candleLighting: candleLighting(es),
                   shkiah: fmt(es.Sunset),  tzait: fmt(es.Tzais) },
-    shevii:     { hanetz: fmt(sv.Sunrise), shkiah: fmt(sv.Sunset), tzait: fmt(sv.Tzais) },
+    shevii:     { hanetz: fmt(sv.Sunrise), shkiah: fmt(sv.Sunset), candleLighting: fmt(sv.Tzais), tzait: fmt(sv.Tzais) },
     acharon:    { hanetz: fmt(ac.Sunrise), shkiah: fmt(ac.Sunset), tzait: fmt(ac.Tzais) },
   };
 }
@@ -372,7 +373,8 @@ function pageErevPesach() {
     zmanRow(Z.erev.hanetz, [e("Hanetz ("), h("הַנֵּץ הַחַמָּה"), e(") — sunrise; "), h("תַּעֲנִית בְּכוֹרוֹת"), e(" begins")]),
     zmanRow(Z.erev.sofBiur, [e("Latest "), h("בִּיעוּר חָמֵץ"), e(" — burn "), h("חָמֵץ"), e(" before this time; recite final "), h("בִּיטּוּל")]),
     zmanRow(Z.erev.plag,  [e("Plag "), h("הַמִּנְחָה")]),
-    zmanRow(Z.erev.shkiah, [e("Shkiah ("), h("שְׁקִיעָה"), e(") — Yom Tov begins; candle lighting")]),
+    zmanRow(Z.erev.shkiah,         [e("Shkiah ("), h("שְׁקִיעָה"), e(") — Yom Tov begins")]),
+    zmanRow(Z.erev.candleLighting, [e("Candle lighting")]),
     zmanRow(Z.erev.tzait,  [e("Tzait ("), h("צֵאת הַכּוֹכָבִים"), e(") — "), h("סֵדֶר"), e(" may begin")]),
     spacer(80),
     candleBox(Z.erev.shkiah,
@@ -415,7 +417,8 @@ function pageYomTov1() {
     zmanRow(Z.yomtov1.hanetz,  [e("Hanetz ("), h("הַנֵּץ הַחַמָּה"), e(") — sunrise")]),
     zmanRow(Z.yomtov1.chatzot, [e("Chatzot ("), h("חֲצוֹת"), e(") — halachic midday")]),
     zmanRow(Z.yomtov1.shkiah,  [e("Shkiah ("), h("שְׁקִיעָה"), e(") — sunset")]),
-    zmanRow(Z.yomtov1.tzait,   [e("Tzait ("), h("צֵאת הַכּוֹכָבִים"), e(") — Yom Tov II begins; candles from existing flame only")]),
+    zmanRow(Z.yomtov1.tzait,          [e("Tzait ("), h("צֵאת הַכּוֹכָבִים"), e(") — Yom Tov II begins")]),
+    zmanRow(Z.yomtov1.candleLighting, [e("Candle lighting — from pre-existing flame only")]),
     spacer(80),
     candleBox(`${Z.yomtov1.tzait} — from pre-existing flame ONLY`,
       "For Day 2: light after tzait from a flame burning since before Yom Tov (yahrzeit candle, gas range). A match or lighter may NOT be used to create a new flame on Yom Tov. Recite \"l'hadlik ner shel Yom Tov\" only — no Shehecheyanu on the second night."),
@@ -523,11 +526,6 @@ function pageShabbat() {
       [wa("Common error — "), wah("הַבְדָּלָה"), wa(" on "), wah("מוֹצָאֵי שַׁבָּת חוֹל הַמּוֹעֵד"), wa(": because "), wah("שַׁבָּת"), wa(" flows into "), wah("חוֹל הַמּוֹעֵד"), wa(" (not a regular weekday), omit "), wah("בְּשָׂמִים"), wa(" and the candle entirely. Recite only wine + \""), wah("הַמַּבְדִּיל בֵּין קֹדֶשׁ לְקֹדֶשׁ"), wa("\". Announce this during "), wah("שַׁחֲרִית"), wa(".")],
       'warn'
     ),
-    spacer(80),
-    alertBox(
-      [ia("Tefillin on "), iah("חוֹל הַמּוֹעֵד"), ia(": not worn on "), iah("שַׁבָּת"), ia(" in any tradition. On weekday "), iah("חוֹל הַמּוֹעֵד"), ia(" days: per "), iah("שֻׁלְחָן עָרוּךְ"), ia("/Sephardic — not worn; per "), iah("רְמ\"א"), ia(" — worn without a "), iah("בְּרָכָה"), ia("; per Vilna Gaon/most Ashkenazic today — not worn at all. Clarify "), iah("מִנְהָג"), ia(" publicly before Pesach.")],
-      'info'
-    ),
   ];
 }
 
@@ -610,7 +608,8 @@ function pageShevii() {
     spacer(60),
     zmanRow(Z.shevii.hanetz, [e("Hanetz ("), h("הַנֵּץ הַחַמָּה"), e(") — sunrise")]),
     zmanRow(Z.shevii.shkiah, [e("Shkiah ("), h("שְׁקִיעָה"), e(")")]),
-    zmanRow(Z.shevii.tzait,  [e("Tzait ("), h("צֵאת הַכּוֹכָבִים"), e(") — "), h("אַחֲרוֹן שֶׁל פֶּסַח"), e(" begins; candles from existing flame only")]),
+    zmanRow(Z.shevii.tzait,          [e("Tzait ("), h("צֵאת הַכּוֹכָבִים"), e(") — "), h("אַחֲרוֹן שֶׁל פֶּסַח"), e(" begins")]),
+    zmanRow(Z.shevii.candleLighting, [e("Candle lighting — from pre-existing flame only")]),
     spacer(80),
     candleBox(`${Z.shevii.tzait} — pre-existing flame ONLY`,
       "Yom Tov VIII begins at tzait. Candles must be lit from a pre-existing flame. Recite \"l'hadlik ner shel Yom Tov.\" No Shehecheyanu between the seventh and eighth days."),

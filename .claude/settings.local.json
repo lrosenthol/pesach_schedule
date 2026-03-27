@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(node -e \":*)",
+      "Bash(node pesach_5786_generator.js)",
+      "Bash(node pesach_5786_generator.js --city \"Chicago\" -o /tmp/pesach-test)",
+      "Bash(node pesach_5786_generator.js --city \"Los Angeles\" -o /tmp/pesach-test)",
+      "Bash(node pesach_5786_generator.js --city \"Jerusalem\" --timezone Asia/Jerusalem -o /tmp/pesach-test)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}

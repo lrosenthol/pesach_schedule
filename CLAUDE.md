@@ -20,8 +20,8 @@ containing the complete Pesach (Passover) schedule for an Orthodox rabbi and con
   English sentences wherever a transliterated term would otherwise appear — not as
   standalone Hebrew paragraphs.
 - Halachic content is calibrated for **Ashkenazic Orthodox** practice, Diaspora (8-day Pesach).
-- Z'manim are approximated for **Pleasantville / Atlantic County, NJ (~39.4°N, 74.4°W)**,
-  using standard GRA calculations.
+- Z'manim default to **Margate City, NJ (39.3287°N, 74.5003°W, America/New_York)**,
+  calculated via `kosher-zmanim` (GRA method). Override with `--city` at runtime.
 
 ---
 
