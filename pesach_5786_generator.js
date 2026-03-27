@@ -398,7 +398,7 @@ function pageErevPesach() {
     spacer(80),
     infoBox(
       [e("Sale of "), h("חָמֵץ"), e(" ("), h("מְכִירַת חָמֵץ"), e(")", { bold:true })],
-      [e(`Sale must be completed before ${Z.erev.sofBiur}. A `), h("שְׁטַר הַרְשָׁאָה"), e(" must be signed. "), h("חָמֵץ"), e(" owned by a Jew during Pesach is forbidden "), h("בַּהֲנָאָה"), e(" even "), h("בְּדִיעֲבַד"), e(". Sold "), h("חָמֵץ"), e(" must be locked and labeled. It reverts only after the rabbi formally concludes the sale after Yom Tov (Friday night, April 10).")],
+      [e(`Sale must be completed before ${Z.erev.sofBiur}. A `), h("שְׁטַר הַרְשָׁאָה"), e(" must be signed. "), h("חָמֵץ"), e(" owned by a Jew during Pesach is forbidden "), h("בַּהֲנָאָה"), e(" even "), h("בְּדִיעֲבַד"), e(". Sold "), h("חָמֵץ"), e(" must be locked and labeled. It reverts only after the rabbi formally concludes the sale after Yom Tov (Thursday night, April 9).")],
       GRAY_LIGHT
     ),
     spacer(80),
@@ -569,7 +569,7 @@ function pageCholHamoed() {
 
 function pageErevShevii() {
   return [
-    dayHeader("Chol HaMoed / Erev Yom Tov", "עֶרֶב שְׁבִיעִי שֶׁל פֶּסַח", "Wednesday, April 8, 2026 / 21 Nisan 5786 — Day 7 / Eve of the Seventh Day", GREEN),
+    dayHeader("Chol HaMoed / Erev Yom Tov", "עֶרֶב שְׁבִיעִי שֶׁל פֶּסַח", "Tuesday, April 7, 2026 / 20 Nisan 5786 — Day 6 / Eve of the Seventh Day", GREEN),
     spacer(120),
     sectionLabel("Z'MANIM", GREEN_LIGHT),
     spacer(60),
@@ -604,7 +604,7 @@ function pageErevShevii() {
 
 function pageShevii() {
   return [
-    dayHeader("Yom Tov VII", "שְׁבִיעִי שֶׁל פֶּסַח", "Thursday, April 9, 2026 / 21 Nisan 5786 — Seventh Day of Pesach", BLUE),
+    dayHeader("Yom Tov VII", "שְׁבִיעִי שֶׁל פֶּסַח", "Wednesday, April 8, 2026 / 21 Nisan 5786 — Seventh Day of Pesach", BLUE),
     spacer(120),
     sectionLabel("Z'MANIM", BLUE_LIGHT),
     spacer(60),
@@ -642,7 +642,7 @@ function pageShevii() {
 
 function pageAcharon() {
   return [
-    dayHeader("Yom Tov VIII", "אַחֲרוֹן שֶׁל פֶּסַח", "Friday, April 10, 2026 / 22 Nisan 5786 — Last Day of Pesach / Yizkor", BLUE),
+    dayHeader("Yom Tov VIII", "אַחֲרוֹן שֶׁל פֶּסַח", "Thursday, April 9, 2026 / 22 Nisan 5786 — Last Day of Pesach / Yizkor", BLUE),
     spacer(120),
     sectionLabel("Z'MANIM", BLUE_LIGHT),
     spacer(60),
