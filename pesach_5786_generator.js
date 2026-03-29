@@ -74,7 +74,7 @@ let Z = {
   cholhamoed: { hanetz: "6:36 AM", shkiah: "7:25 PM", tzait: "8:06 PM" },
   erevshevii: { hanetz: "6:31 AM", candleLighting: "7:10 PM", shkiah: "7:28 PM", tzait: "8:09 PM" },
   shevii:     { hanetz: "6:29 AM", shkiah: "7:29 PM", candleLighting: "8:10 PM", tzait: "8:10 PM" },
-  acharon:    { hanetz: "6:28 AM", shkiah: "7:30 PM", tzait: "8:11 PM" },
+  acharon:    { hanetz: "6:28 AM", shkiah: "7:30 PM", tzait: "8:11 PM", chametzPermitted: "8:46 PM" },
 };
 
 // ── Timezone inference from longitude ─────────────────────────────────────────
@@ -174,7 +174,8 @@ function calcZmanim(lat, lon, tz) {
     erevshevii: { hanetz: fmt(es.Sunrise), candleLighting: candleLighting(es),
                   shkiah: fmt(es.Sunset),  tzait: fmt(es.Tzais) },
     shevii:     { hanetz: fmt(sv.Sunrise), shkiah: fmt(sv.Sunset), candleLighting: fmt(sv.Tzais), tzait: fmt(sv.Tzais) },
-    acharon:    { hanetz: fmt(ac.Sunrise), shkiah: fmt(ac.Sunset), tzait: fmt(ac.Tzais) },
+    acharon:    { hanetz: fmt(ac.Sunrise), shkiah: fmt(ac.Sunset), tzait: fmt(ac.Tzais),
+                  chametzPermitted: fmt(new Date(new Date(ac.Tzais).getTime() + 35 * 60000).toISOString()) },
   };
 }
 
@@ -313,10 +314,10 @@ function alertBox(runs, type='warn') {
 }
 
 // ── Candle lighting box ───────────────────────────────────────────────────────
-function candleBox(timeStr, noteText) {
+function candleBox(timeStr, bodyRuns) {
   return infoBox(
     [e("Candle Lighting — ", { bold:true }), e(timeStr, { bold:true, color:BLUE })],
-    [e(noteText)],
+    Array.isArray(bodyRuns) ? bodyRuns : [e(bodyRuns)],
     CANDLE_TINT
   );
 }
@@ -327,7 +328,7 @@ function torahBox(rows) {
     para([e("Torah Reading", { bold:true, size:19 })], { spacing:{ before:0, after:50 } }),
     ...rows.map(r => para([
       e(r.label + ":  ", { bold:true, size:18 }),
-      e(r.text, { size:18 })
+      ...(Array.isArray(r.text) ? r.text : [e(r.text, { size:18 })])
     ], { spacing:{ before:0, after:32 } }))
   ];
   return new Table({
@@ -387,13 +388,14 @@ function pageErevPesach() {
     zmanRow(Z.erev.tzait,  [e("Tzait ("), h("צֵאת הַכּוֹכָבִים"), e(") — "), h("סֵדֶר"), e(" may begin")]),
     spacer(80),
     candleBox(Z.erev.shkiah,
-      "Recite two brachot: \"l'hadlik ner shel Yom Tov\" and \"Shehecheyanu.\" A pre-existing flame is preferable (e.g., a yahrzeit candle lit before the holiday), though a match is permitted since Yom Tov has not yet begun at lighting time."),
+      [e("Recite two "), h("בְּרָכוֹת"), e(": \""), h("לְהַדְלִיק נֵר שֶׁל יוֹם טוֹב"), e("\" and \""), h("שֶׁהֶחֱיָנוּ"), e("\". A pre-existing flame is preferable (e.g., a yahrzeit candle lit before the holiday), though a match is permitted since Yom Tov has not yet begun at lighting time.")]),
     spacer(80),
     sectionLabel("DAVENING / SERVICES", GRAY_LIGHT),
     spacer(60),
     serviceRow("8:00 AM", [h("שַׁחֲרִית"), e(" — no "), h("תַּחֲנוּן"), e("; "), h("סִיּוּם"), e(" to release firstborns from "), h("תַּעֲנִית בְּכוֹרוֹת")]),
     serviceRow("7:10 PM", [h("מִנְחָה"), e(" — brief; light candles before "), h("שְׁקִיעָה")]),
-    serviceRow(Z.erev.tzait, [h("מַעֲרִיב"), e(" / "), h("קִדּוּשׁ"), e(" / Seder Night 1 — begin after "), h("צֵאת הַכּוֹכָבִים")]),
+    serviceRow(Z.erev.tzait, [h("מַעֲרִיב"), e(" / "), h("קִדּוּשׁ")]),
+    serviceRow(Z.erev.tzait, [h("סֵדֶר"), e(" Night 1 — may begin (after "), h("צֵאת הַכּוֹכָבִים"), e(")")]),
     spacer(100),
     sectionLabel("HALACHA", GRAY_LIGHT),
     spacer(60),
@@ -430,21 +432,22 @@ function pageYomTov1() {
     zmanRow(Z.yomtov1.candleLighting, [e("Candle lighting — from pre-existing flame only")]),
     spacer(80),
     candleBox(`${Z.yomtov1.tzait} — from pre-existing flame ONLY`,
-      "For Day 2: light after tzait from a flame burning since before Yom Tov (yahrzeit candle, gas range). A match or lighter may NOT be used to create a new flame on Yom Tov. Recite \"l'hadlik ner shel Yom Tov\" only — no Shehecheyanu on the second night."),
+      [e("For Day 2: light after "), h("צֵאת"), e(" from a flame burning since before Yom Tov (yahrzeit candle, gas range). A match or lighter may NOT be used to create a new flame on Yom Tov. Recite \""), h("לְהַדְלִיק נֵר שֶׁל יוֹם טוֹב"), e("\" only — no "), h("שֶׁהֶחֱיָנוּ"), e(" on the second night.")]),
     spacer(80),
     sectionLabel("DAVENING / SERVICES", BLUE_LIGHT),
     spacer(60),
     serviceRow("9:30 AM", [h("שַׁחֲרִית"), e(" — full "), h("הַלֵּל"), e("; "), h("מוּסָף"), e(" with "), h("תְּפִלַּת טַל"), e("; begin "), h("מוֹרִיד הַטַּל"), e("; cease "), h("מַשִּׁיב הָרוּחַ"), e(" and "), h("וְתֵן טַל וּמָטָר")]),
     serviceRow("7:10 PM", [h("מִנְחָה")]),
-    serviceRow("7:45 PM", [h("מַעֲרִיב"), e(" / "), h("קִדּוּשׁ"), e(" / Seder Night 2")]),
+    serviceRow("7:45 PM", [h("מַעֲרִיב"), e(" / "), h("קִדּוּשׁ")]),
+    serviceRow(Z.yomtov1.tzait, [h("סֵדֶר"), e(" Night 2 — may begin (after "), h("צֵאת הַכּוֹכָבִים"), e(")")]),
     spacer(100),
     sectionLabel("TORAH READING & PRAYER NOTES", BLUE_LIGHT),
     spacer(60),
     torahBox([
-      { label:"Main — Scroll 1 (5 aliyot)", text:"Exodus 12:21–51 — The Passover offering in Egypt; plague of the firstborn; \"On this very day, G-d took the Children of Israel out of Egypt\"" },
+      { label:"Main — Scroll 1 (5 aliyot)", text:[e("Exodus (", {size:18}), h("שְׁמוֹת", {size:18}), e(") 12:21–51 — The Passover offering in Egypt; plague of the firstborn; \"On this very day, G-d took the Children of Israel out of Egypt\"", {size:18})] },
       { label:"Aliyot",          text:"1: Ex.12:21–28 · 2: 12:29–33 · 3: 12:34–37 · 4: 12:38–42 · 5: 12:43–51" },
-      { label:"Maftir — Scroll 2", text:"Numbers 28:16–25 — Festival sacrifices brought on Passover" },
-      { label:"Haftarah",        text:"Joshua 5:2–6:1, 6:27 — The first Passover observed in the Land of Israel at Gilgal" },
+      { label:"Maftir — Scroll 2", text:[e("Numbers (", {size:18}), h("בְּמִדְבַּר", {size:18}), e(") 28:16–25 — Festival sacrifices brought on Passover", {size:18})] },
+      { label:"Haftarah",        text:[e("Joshua (", {size:18}), h("יְהוֹשֻׁעַ", {size:18}), e(") 5:2–6:1, 6:27 — The first Passover observed in the Land of Israel at Gilgal", {size:18})] },
     ]),
     spacer(80),
     infoBox(
@@ -473,7 +476,7 @@ function pageYomTov2() {
     zmanRow(Z.yomtov2.tzait,  [e("Tzait ("), h("צֵאת הַכּוֹכָבִים"), e(")")]),
     spacer(80),
     candleBox(`${Z.yomtov2.candleLighting} — pre-existing flame ONLY`,
-      "Yom Tov is still active at candle lighting time — a match or lighter absolutely may NOT be used. Light from a yahrzeit candle or gas range. Recite \"l'hadlik ner shel Shabbat v'Yom Tov.\" No Shehecheyanu when Yom Tov transitions into Shabbat."),
+      [e("Yom Tov is still active at candle lighting time — a match or lighter absolutely may NOT be used. Light from a yahrzeit candle or gas range. Recite \""), h("לְהַדְלִיק נֵר שֶׁל שַׁבָּת וְיוֹם טוֹב"), e("\". No "), h("שֶׁהֶחֱיָנוּ"), e(" when Yom Tov transitions into "), h("שַׁבָּת"), e(".")]),
     spacer(80),
     sectionLabel("DAVENING / SERVICES", BLUE_LIGHT),
     spacer(60),
@@ -484,14 +487,14 @@ function pageYomTov2() {
     sectionLabel("TORAH READING & PRAYER NOTES", BLUE_LIGHT),
     spacer(60),
     torahBox([
-      { label:"Main — Scroll 1 (5 aliyot)", text:"Leviticus 22:26–23:44 — The festival calendar: the appointed times (Pesach, Omer, Shavuot, Rosh Hashana, Yom Kippur, Sukkot); obligation of pilgrimage" },
+      { label:"Main — Scroll 1 (5 aliyot)", text:[e("Leviticus (", {size:18}), h("וַיִּקְרָא", {size:18}), e(") 22:26–23:44 — The festival calendar: the appointed times (Pesach, Omer, Shavuot, Rosh Hashana, Yom Kippur, Sukkot); obligation of pilgrimage", {size:18})] },
       { label:"Aliyot",          text:"1: Lev.22:26–23:3 · 2: 23:4–14 · 3: 23:15–22 · 4: 23:23–32 · 5: 23:33–44" },
-      { label:"Maftir — Scroll 2", text:"Numbers 28:16–25 — Festival sacrifices (same as Day 1)" },
-      { label:"Haftarah",        text:"II Kings 23:1–9, 21–25 — King Josiah's national covenant renewal and great Passover celebration" },
+      { label:"Maftir — Scroll 2", text:[e("Numbers (", {size:18}), h("בְּמִדְבַּר", {size:18}), e(") 28:16–25 — Festival sacrifices (same as Day 1)", {size:18})] },
+      { label:"Haftarah",        text:[e("II Kings (", {size:18}), h("מְלָכִים ב׳", {size:18}), e(") 23:1–9, 21–25 — King Josiah's national covenant renewal and great Passover celebration", {size:18})] },
     ]),
     spacer(80),
     alertBox(
-      [wa("Critical: "), wah("שַׁבָּת חוֹל הַמּוֹעֵד"), wa(" begins tonight! Candles from existing flame only. "), wah("הַבְדָּלָה"), wa(" on "), wah("מוֹצָאֵי שַׁבָּת"), wa(": no "), wah("בְּשָׂמִים"), wa(", no candle — wine and "), wah("הַבְדָּלָה"), wa(" "), wah("בְּרָכָה"), wa(" only ("), wah("קֹדֶשׁ לְקֹדֶשׁ"), wa(").")],
+      [wa("Tonight: "), wah("שַׁבָּת חוֹל הַמּוֹעֵד"), wa(" begins at "), wah("שְׁקִיעָה"), wa(". Candles must be lit from a pre-existing flame only. See Shabbat page for "), wah("הַבְדָּלָה"), wa(" instructions.")],
       'warn'
     ),
   ];
@@ -512,7 +515,6 @@ function pageShabbat() {
     sectionLabel("DAVENING / SERVICES", AMBER_LIGHT),
     spacer(60),
     serviceRow("9:30 AM", [h("שַׁחֲרִית"), e(" — "), h("שַׁבָּת"), e(" "), h("נֻסַּח"), e("; full "), h("הַלֵּל"), e("; Torah reading; "), h("מוּסָף"), e(" ("), h("שַׁבָּת"), e(" + "), h("חוֹל הַמּוֹעֵד"), e(" combined); no "), h("יִזְכּוֹר")]),
-    serviceRow("~1:00 PM", [h("סְעוּדָה שְׁלִישִׁית"), e(" — "), h("שִׁיר הַשִּׁירִים"), e(" reading customary")]),
     serviceRow("7:10 PM",  [h("מִנְחָה")]),
     serviceRow(Z.shabbat.tzait, [h("שַׁבָּת"), e(" ends")]),
     serviceRow(Z.shabbat.tzait, [h("מַעֲרִיב"), e(" + "), h("הַבְדָּלָה"), e(" — wine only; no "), h("בְּשָׂמִים"), e(", no candle ("), h("קֹדֶשׁ לְקֹדֶשׁ"), e(")")]),
@@ -520,10 +522,10 @@ function pageShabbat() {
     sectionLabel("TORAH READING & PRAYER NOTES", AMBER_LIGHT),
     spacer(60),
     torahBox([
-      { label:"Main — Scroll 1 (7 aliyot on Shabbat)", text:"Exodus 33:12–34:26 — Moses and the Thirteen Attributes of Mercy; covenant renewal; laws of the festivals" },
+      { label:"Main — Scroll 1 (7 aliyot on Shabbat)", text:[e("Exodus (", {size:18}), h("שְׁמוֹת", {size:18}), e(") 33:12–34:26 — Moses and the Thirteen Attributes of Mercy; covenant renewal; laws of the festivals", {size:18})] },
       { label:"Aliyot",          text:"1: Ex.33:12–16 · 2: 33:17–19 · 3: 33:20–23 · 4: 34:1–3 · 5: 34:4–10 · 6: 34:11–17 · 7: 34:18–26" },
-      { label:"Maftir — Scroll 2", text:"Numbers 28:19–25 — Festival sacrifices" },
-      { label:"Haftarah",        text:"Ezekiel 37:1–14 — The Valley of Dry Bones: national resurrection, ingathering of exiles, and future redemption" },
+      { label:"Maftir — Scroll 2", text:[e("Numbers (", {size:18}), h("בְּמִדְבַּר", {size:18}), e(") 28:19–25 — Festival sacrifices", {size:18})] },
+      { label:"Haftarah",        text:[e("Ezekiel (", {size:18}), h("יְחֶזְקֵאל", {size:18}), e(") 37:1–14 — The Valley of Dry Bones: national resurrection, ingathering of exiles, and future redemption", {size:18})] },
     ]),
     spacer(80),
     infoBox(
@@ -535,6 +537,18 @@ function pageShabbat() {
     alertBox(
       [wa("Common error — "), wah("הַבְדָּלָה"), wa(" on "), wah("מוֹצָאֵי שַׁבָּת חוֹל הַמּוֹעֵד"), wa(": because "), wah("שַׁבָּת"), wa(" flows into "), wah("חוֹל הַמּוֹעֵד"), wa(" (not a regular weekday), omit "), wah("בְּשָׂמִים"), wa(" and the candle entirely. Recite only wine + \""), wah("הַמַּבְדִּיל בֵּין קֹדֶשׁ לְקֹדֶשׁ"), wa("\". Announce this during "), wah("שַׁחֲרִית"), wa(".")],
       'warn'
+    ),
+    spacer(80),
+    infoBox(
+      [h("שִׁיר הַשִּׁירִים"), e(" — Reading on "), h("שַׁבָּת חוֹל הַמּוֹעֵד"), e("", { bold:true })],
+      [e("The reading of "), h("שִׁיר הַשִּׁירִים"), e(" on "), h("שַׁבָּת חוֹל הַמּוֹעֵד"), e(" of Pesach is widely observed among Ashkenazic communities, based on its themes of love, longing, and redemption as an allegory for the Exodus. Three main customs exist:"),
+       e(""),
+       e("• "), e("Friday night", {bold:true}), e(": some congregations read it at "), h("קַבָּלַת שַׁבָּת"), e(" before "), h("מַעֲרִיב"), e(", mirroring the reading of "), h("שִׁיר הַשִּׁירִים"), e(" on Friday nights throughout the year (Vilna Gaon tradition)."),
+       e(""),
+       e("• "), e("Shabbat morning, before davening", {bold:true}), e(": common in many Ashkenazic synagogues; recited by the "), h("חַזָּן"), e(" or congregation aloud before "), h("שַׁחֲרִית"), e("."),
+       e(""),
+       e("• "), e("Shabbat afternoon", {bold:true}), e(": some read it at or after "), h("מִנְחָה"), e(", treating it as a companion to "), h("סְעוּדָה שְׁלִישִׁית"), e(". Sephardic communities generally do not have this custom. Announce your congregation's minhag before Shabbat.")],
+      AMBER_LIGHT
     ),
   ];
 }
@@ -559,11 +573,11 @@ function pageCholHamoed() {
     spacer(60),
     torahBox([
       { label:"Sunday, Apr 5 — Chol HaMoed Day 1",
-        text:"Main: Exodus 13:1–16 — Sanctifying the firstborn; laws of Pesach and matzah; obligation to tell one's children the story of the Exodus. Maftir: Numbers 28:19–25" },
+        text:[e("Main: Exodus (", {size:18}), h("שְׁמוֹת", {size:18}), e(") 13:1–16 — Sanctifying the firstborn; laws of Pesach and matzah; obligation to tell one's children the story of the Exodus. Maftir: Numbers (", {size:18}), h("בְּמִדְבַּר", {size:18}), e(") 28:19–25", {size:18})] },
       { label:"Monday, Apr 6 — Chol HaMoed Day 2",
-        text:"Main: Exodus 22:24–23:19 — Laws of lending and justice; the festival calendar; \"do not boil a kid in its mother's milk\" (source of meat-milk separation). Maftir: Numbers 28:19–25" },
+        text:[e("Main: Exodus (", {size:18}), h("שְׁמוֹת", {size:18}), e(") 22:24–23:19 — Laws of lending and justice; the festival calendar; \"do not boil a kid in its mother's milk\" (source of meat-milk separation). Maftir: Numbers (", {size:18}), h("בְּמִדְבַּר", {size:18}), e(") 28:19–25", {size:18})] },
       { label:"Tuesday, Apr 7 — Chol HaMoed Day 3",
-        text:"Main: Exodus 34:1–26 — Moses receives the second tablets; G-d's Thirteen Attributes of Mercy; covenant renewal and festival laws. Maftir: Numbers 28:19–25" },
+        text:[e("Main: Exodus (", {size:18}), h("שְׁמוֹת", {size:18}), e(") 34:1–26 — Moses receives the second tablets; G-d's Thirteen Attributes of Mercy; covenant renewal and festival laws. Maftir: Numbers (", {size:18}), h("בְּמִדְבַּר", {size:18}), e(") 28:19–25", {size:18})] },
       { label:"Note", text:"On Chol HaMoed only 4 aliyot are called (vs. 5 on Yom Tov and 7 on Shabbat). No Kohen-Levi distinction for aliyot 3 and 4." },
     ]),
     spacer(80),
@@ -587,7 +601,7 @@ function pageErevShevii() {
     zmanRow(Z.erevshevii.tzait,          [e("Tzait ("), h("צֵאת הַכּוֹכָבִים"), e(")")]),
     spacer(80),
     candleBox(Z.erevshevii.candleLighting,
-      "Light before shkiah — Yom Tov has not yet begun, so a match or lighter is permitted. Recite \"l'hadlik ner shel Yom Tov\" and \"Shehecheyanu.\""),
+      [e("Light before "), h("שְׁקִיעָה"), e(" — Yom Tov has not yet begun, so a match or lighter is permitted. Recite \""), h("לְהַדְלִיק נֵר שֶׁל יוֹם טוֹב"), e("\" and \""), h("שֶׁהֶחֱיָנוּ"), e("\".")]),
     spacer(80),
     sectionLabel("DAVENING / SERVICES", GREEN_LIGHT),
     spacer(60),
@@ -598,8 +612,8 @@ function pageErevShevii() {
     sectionLabel("TORAH READING", GREEN_LIGHT),
     spacer(60),
     torahBox([
-      { label:"Main (4 aliyot)",   text:"Numbers 9:1–14 — Pesach Sheni: those who were ritually impure or on a distant journey may offer the Paschal lamb one month later, on 14 Iyyar. The principle: no Jew should ever be left without a way to participate in the national experience" },
-      { label:"Maftir",            text:"Numbers 28:19–25 — Festival sacrifices" },
+      { label:"Main (4 aliyot)",   text:[e("Numbers (", {size:18}), h("בְּמִדְבַּר", {size:18}), e(") 9:1–14 — Pesach Sheni: those who were ritually impure or on a distant journey may offer the Paschal lamb one month later, on 14 Iyyar. The principle: no Jew should ever be left without a way to participate in the national experience", {size:18})] },
+      { label:"Maftir",            text:[e("Numbers (", {size:18}), h("בְּמִדְבַּר", {size:18}), e(") 28:19–25 — Festival sacrifices", {size:18})] },
     ]),
     spacer(80),
     infoBox(
@@ -622,7 +636,7 @@ function pageShevii() {
     zmanRow(Z.shevii.candleLighting, [e("Candle lighting — from pre-existing flame only")]),
     spacer(80),
     candleBox(`${Z.shevii.tzait} — pre-existing flame ONLY`,
-      "Yom Tov VIII begins at tzait. Candles must be lit from a pre-existing flame. Recite \"l'hadlik ner shel Yom Tov.\" No Shehecheyanu between the seventh and eighth days."),
+      [e("Yom Tov VIII begins at "), h("צֵאת"), e(". Candles must be lit from a pre-existing flame. Recite \""), h("לְהַדְלִיק נֵר שֶׁל יוֹם טוֹב"), e("\". No "), h("שֶׁהֶחֱיָנוּ"), e(" between the seventh and eighth days.")]),
     spacer(80),
     sectionLabel("DAVENING / SERVICES", BLUE_LIGHT),
     spacer(60),
@@ -633,11 +647,11 @@ function pageShevii() {
     sectionLabel("TORAH READING & PRAYER NOTES", BLUE_LIGHT),
     spacer(60),
     torahBox([
-      { label:"Main — Scroll 1 (5 aliyot)", text:"Exodus 13:17–15:26 — Israel's journey from Egypt; Pharaoh's pursuit; the splitting of the sea; Shirat HaYam (Song of the Sea, Ex. 15:1–21); Miriam's song" },
-      { label:"Aliyot",          text:"1: Ex.13:17–14:8 · 2: 14:9–14 · 3: 14:15–25 · 4: 14:26–15:19 (includes the Shira — stand while it is chanted) · 5: 15:20–26" },
-      { label:"Maftir — Scroll 2", text:"Numbers 28:19–25 — Festival sacrifices" },
-      { label:"Haftarah",        text:"II Samuel 22:1–51 — David's Song of Deliverance, closely parallel to the Shirat HaYam in themes of miraculous salvation" },
-      { label:"Note",            text:"The Shira (Ex. 15) is written in a unique ariach al gabei levena (brick-and-mortar) layout and chanted with special trope. The congregation traditionally stands and chants aloud together. Designate a skilled baal keriah well in advance." },
+      { label:"Main — Scroll 1 (5 aliyot)", text:[e("Exodus (", {size:18}), h("שְׁמוֹת", {size:18}), e(") 13:17–15:26 — Israel's journey from Egypt; Pharaoh's pursuit; the splitting of the sea; ", {size:18}), h("שִׁירַת הַיָּם", {size:18}), e(" (Song of the Sea, Ex. 15:1–21); Miriam's song", {size:18})] },
+      { label:"Aliyot",          text:[e("1: Ex.13:17–14:8 · 2: 14:9–14 · 3: 14:15–25 · 4: 14:26–15:19 (includes the ", {size:18}), h("שִׁירָה", {size:18}), e(" — stand while it is chanted) · 5: 15:20–26", {size:18})] },
+      { label:"Maftir — Scroll 2", text:[e("Numbers (", {size:18}), h("בְּמִדְבַּר", {size:18}), e(") 28:19–25 — Festival sacrifices", {size:18})] },
+      { label:"Haftarah",        text:[e("II Samuel (", {size:18}), h("שְׁמוּאֵל ב׳", {size:18}), e(") 22:1–51 — David's Song of Deliverance, closely parallel to the ", {size:18}), h("שִׁירַת הַיָּם", {size:18}), e(" in themes of miraculous salvation", {size:18})] },
+      { label:"Note",            text:[e("The ", {size:18}), h("שִׁירָה", {size:18}), e(" (Ex. 15) is written in a unique ", {size:18}), h("אֲרִיחַ עַל גַּבֵּי לְבֵנָה", {size:18}), e(" (brick-and-mortar) layout and chanted with special trope. The congregation traditionally stands and chants aloud together. Designate a skilled ", {size:18}), h("בַּעַל קְרִיאָה", {size:18}), e(" well in advance.", {size:18})] },
     ]),
     spacer(80),
     infoBox(
@@ -656,7 +670,8 @@ function pageAcharon() {
     spacer(60),
     zmanRow(Z.acharon.hanetz, [e("Hanetz ("), h("הַנֵּץ הַחַמָּה"), e(") — sunrise")]),
     zmanRow(Z.acharon.shkiah, [e("Shkiah ("), h("שְׁקִיעָה"), e(") — Pesach ends (outside Israel)")]),
-    zmanRow(Z.acharon.tzait,  [e("Tzait ("), h("צֵאת הַכּוֹכָבִים"), e(") — full "), h("הַבְדָּלָה"), e("; "), h("חָמֵץ"), e(" permitted")]),
+    zmanRow(Z.acharon.tzait,          [e("Tzait ("), h("צֵאת הַכּוֹכָבִים"), e(") — full "), h("הַבְדָּלָה"), e(" may be recited")]),
+    zmanRow(Z.acharon.chametzPermitted, [h("חָמֵץ"), e(" permitted (35 min after "), h("צֵאת"), e(")")]),
     spacer(100),
     sectionLabel("DAVENING / SERVICES", BLUE_LIGHT),
     spacer(60),
@@ -666,14 +681,15 @@ function pageAcharon() {
     serviceRow("7:00 PM",  [h("מִנְחָה")]),
     serviceRow("Following Mincha", [h("סְעוּדַת מָשִׁיחַ"), e(" — "), h("דִּבְרֵי תּוֹרָה"), e(" and "), h("לְחַיִּים")]),
     serviceRow(Z.acharon.tzait, [h("מַעֲרִיב"), e(" + full "), h("הַבְדָּלָה"), e(" (wine, "), h("בְּשָׂמִים"), e(", candle)")]),
+    serviceRow(Z.acharon.chametzPermitted, [h("חָמֵץ"), e(" permitted — earliest to purchase / reopen sold "), h("חָמֵץ")]),
     spacer(100),
     sectionLabel("TORAH READING & PRAYER NOTES", BLUE_LIGHT),
     spacer(60),
     torahBox([
-      { label:"Main — Scroll 1 (5 aliyot)", text:"Deuteronomy 15:19–16:17 — Sanctifying firstborn animals; the three pilgrimage festivals (Pesach, Shavuot, Sukkot) and their observances and sacrifices" },
+      { label:"Main — Scroll 1 (5 aliyot)", text:[e("Deuteronomy (", {size:18}), h("דְּבָרִים", {size:18}), e(") 15:19–16:17 — Sanctifying firstborn animals; the three pilgrimage festivals (Pesach, Shavuot, Sukkot) and their observances and sacrifices", {size:18})] },
       { label:"Aliyot",          text:"1: Deut.15:19–23 · 2: 16:1–3 · 3: 16:4–8 · 4: 16:9–12 · 5: 16:13–17" },
-      { label:"Maftir — Scroll 2", text:"Numbers 28:19–25 — Festival sacrifices" },
-      { label:"Haftarah",        text:"Isaiah 10:32–12:6 — The messianic ingathering; universal peace; \"You shall draw water with joy from the wellsprings of salvation\"" },
+      { label:"Maftir — Scroll 2", text:[e("Numbers (", {size:18}), h("בְּמִדְבַּר", {size:18}), e(") 28:19–25 — Festival sacrifices", {size:18})] },
+      { label:"Haftarah",        text:[e("Isaiah (", {size:18}), h("יְשַׁעְיָהוּ", {size:18}), e(") 10:32–12:6 — The messianic ingathering; universal peace; \"You shall draw water with joy from the wellsprings of salvation\"", {size:18})] },
     ]),
     spacer(80),
     infoBox(
